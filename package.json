@@ -3,12 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@firebase/app": "^0.6.12",
+    "@firebase/auth": "^0.15.1",
+    "@firebase/firestore": "^2.0.0",
+    "@rematch/core": "^1.4.0",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "env": "0.0.2",
+    "firebase": "^8.0.0",
     "react": "^17.0.1",
+    "react-datepicker": "^3.3.0",
     "react-dom": "^17.0.1",
+    "react-flickity-component": "^3.5.0",
+    "react-redux": "^7.2.2",
     "react-scripts": "4.0.0",
+    "styled-components": "^5.2.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
