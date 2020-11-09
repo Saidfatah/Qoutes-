@@ -1,13 +1,13 @@
 import React  from 'react'
-import Qoute from './Qoute/Qoute'
+import Quote from './Quote/Quote'
 
-const QoutesList = ({qoutes}) => {
+const QoutesList = ({quotes}) => {
 
-    if(!qoutes.length) return <p>no qoutes loaded</p>
+    if(!quotes.length) return <p>no qoutes loaded</p>
     
     return (
         <div>
-            {qoutes.map((qoute,i)=> <Qoute key={i} qoute={qoute} />)}
+            {quotes.map((quote,i)=> <Quote key={i} quote={quote} />)}
         </div>
     )
 }

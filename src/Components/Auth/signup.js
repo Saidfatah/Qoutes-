@@ -14,7 +14,7 @@ const userInfoIntial ={
     birth_date: "" ,
 }
 
-const Signup=({error,registerSuccess,signup})=> {
+const Signup=({error,IsAuthenticated,signup})=> {
     const [userInfo, setuserInfo] = useState({...userInfoIntial})
     const [startDate, setStartDate] = useState(new Date());
 
@@ -25,6 +25,8 @@ const Signup=({error,registerSuccess,signup})=> {
     }
     const handleChange= field => e => setuserInfo({...userInfo,[field]:e.target.value})
 
+
+    if(IsAuthenticated)return null
     return (
         <div>
             <h3>sign up </h3>
@@ -44,7 +46,7 @@ const Signup=({error,registerSuccess,signup})=> {
 
 export default connect(
     state=>({
-        registerSuccess: state.auth.registerSuccess,
+        IsAuthenticated: state.auth.IsAuthenticated,
         error:  state.error,
     }), 
     dispatch=>({

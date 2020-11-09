@@ -1,9 +1,10 @@
 import React from 'react'
-
-const UserInfo= ({user})=> {
+import {UserName,FullName} from './styled'
+const UserInfo= ({full_name,user_name})=> {
     return (
         <div>
-           user info  
+           <UserName>{user_name}</UserName>
+           <FullName>{full_name}</FullName>
         </div>
     )
 }

@@ -2,7 +2,7 @@ import React,{useState} from 'react'
 import { connect } from 'react-redux'
 
 
-const Loging=({login})=> {
+const Loging=({login,IsAuthenticated})=> {
     const [email, setemail] = useState("ali@sali.com")
     const [password, setpassword] = useState("123456")
 
@@ -10,7 +10,8 @@ const Loging=({login})=> {
         e.preventDefault()
         login({email,password})
     }
-
+  
+    if(IsAuthenticated) return null
     return (
         <div>
             <h3>Loging</h3>
@@ -32,7 +33,8 @@ const Loging=({login})=> {
 
 export default connect(
     state=>({
-        registerSuccess: state.auth.registerSuccess
+        registerSuccess: state.auth.registerSuccess,
+        IsAuthenticated: state.auth.IsAuthenticated,
     }), 
     dispatch=>({
         login: dispatch.auth.login,

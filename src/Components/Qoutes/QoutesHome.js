@@ -2,16 +2,16 @@ import React,{useEffect}  from 'react'
 import { connect } from 'react-redux'
 import QoutesList from './QoutesList'
 
-export const QoutesHome = ({qoutes,loadHomeQoutes}) => {
+export const QoutesHome = ({quotes,loadHomeQoutes}) => {
     useEffect(() => {
         loadHomeQoutes()
     }, [])
-    return <QoutesList qoutes={qoutes} />
+    return <QoutesList quotes={quotes} />
 }
 
 export default connect(
     state=>({
-        qoutes:state.quotes.qoutes_home 
+        quotes:state.quotes.qoutes_home 
     }), 
     dispatch =>({
         loadHomeQoutes:dispatch.quotes.loadHomeQoutes

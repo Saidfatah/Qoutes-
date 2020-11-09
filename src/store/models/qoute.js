@@ -7,9 +7,9 @@ import {QOUTE_DELETED,QOUTE_POSTED,QOUTE_UPDATED,QOUTE_UNSHARE,QOUTE_SHARED} fro
 
 const model ={
     state:{
-        qoutes_home       :[],
-        qoutes_profile    :[],
-        fetch_Limit_home  :3,
+        qoutes_home          :[],
+        qoutes_profile       :[],
+        fetch_Limit_home     :2,
         fetch_Limit_profile  :10
     },
     reducers:{
