@@ -1,9 +1,9 @@
 import React from 'react'
 
-const QuoteContent=({qoute_text,image})=> {
+const QuoteContent=({quote_text,image})=> {
     return (
         <div>
-            {qoute_text}
+            {quote_text}
         </div>
     )
 }

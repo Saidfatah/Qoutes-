@@ -13,7 +13,6 @@ const model ={
     },
     effects:(dispatch)=>({
         async add({message,type}){
-            console.log("toasting: "+message+ type)
              const toast = {message,type,id : new Date().getTime()}
              dispatch.toast.added(toast)
              await new Promise(r=>setTimeout(r,2000))

@@ -8,6 +8,10 @@ export const QOUTE_SHARED  = "qoute was shared succesfully successfuly "
 
 export const LOGGED_IN  = "LOGGED IN SUCCEFULLY"
 export const SIGN_IN    = "YOUR ACCOUTN WAS CREATED"
-export const WELLCOME    = "WELLCOME BACK SIR"
 export const LOGGED_OUT = "LOGGED OUT SUCCEFULLY"
+export const WELLCOME    = "WELLCOME BACK SIR"
+export const FOLLOWED = "FOLLOWED SUCCEFULLY"
+export const UNFOLLOWED = "UNFOLLOWED SUCCEFULLY"
+export const BLOCKED = "BLOCKED SUCCEFULLY"
+export const UNBLOCKED = "UNBLOCKED SUCCEFULLY"
 

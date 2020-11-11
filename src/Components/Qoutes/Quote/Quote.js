@@ -9,7 +9,7 @@ import QuoteReplies from './QuoteReplies'
 
 
 export const Qoute = ({profileQuote,user,quote,remove,like,edit,reply,share,followed}) => {
-    const {qoute_text ,quote_publisher,image ,created_at ,tags ,likes ,shared_by,liked_by ,replies} = quote   
+    const {quote_text ,quote_publisher,image ,created_at ,tags ,likes ,shared_by,liked_by ,replies} = quote   
     
     
     if(user === null) return null 
@@ -17,11 +17,11 @@ export const Qoute = ({profileQuote,user,quote,remove,like,edit,reply,share,foll
         <div> 
              <QuotePostType {...{quote_publisher,user,profileQuote,shared_by,liked_by,followed}}/>
              <QuotePublisher  {...{quote_publisher}} />
-             <QuoteContent {...{qoute_text,image}} />
+             <QuoteContent {...{quote_text,image}} />
              {profileQuote && quote_publisher.id !== user.id ? <p>qoute was shared</p> : null}
 
             <div>
-                 <QuoteUserActions {...{remove,edit,visible:quote_publisher.id === user.id}}  />
+                 <QuoteUserActions {...{quote,remove,edit,visible:quote_publisher.id === user.id}}  />
                  <QuotePublicAcions {...{quote,like,reply,share,likes}} />
             </div>
             <QuoteReplies replies={replies} />
@@ -33,7 +33,7 @@ export const Qoute = ({profileQuote,user,quote,remove,like,edit,reply,share,foll
 export default connect(
      state=>({
          user:state.auth.user,
-         followed:state.auth.followed,
+         followed:state.users.followed,
     })
     , 
     dispatch=>({

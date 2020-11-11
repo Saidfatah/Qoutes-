@@ -3,7 +3,7 @@ import React from 'react'
 const QuoteReplies=({replies})=> {
     return (
         <div>
-            {replies.map(reply=><p>{reply.text}</p>)}
+            {replies.map((reply,i) => <p key={i}>{reply.user_name} : {reply.reply_text}</p> )}
         </div>
     )
 }

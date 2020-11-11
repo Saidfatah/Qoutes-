@@ -8,7 +8,6 @@ const model ={
         user:JSON.parse(localStorage.getItem('user')) || userModel(),
         IsAuthenticated:false,
         registerSuccess:false,
-        followed:JSON.parse(localStorage.getItem('followed'))
     },
     reducers:{
         authenticated:(state,payload)=>({...state,user:payload.user,IsAuthenticated : true}),
@@ -39,20 +38,6 @@ const model ={
         },
         async login({email,password}){
             try {
-                localStorage.setItem('followed',JSON.stringify([
-                    {
-                        user_name:"mohMo",
-                        id:"2OFAMNWk7ycLzaPVi3SJbJe7kBB3"
-                    },
-                    {
-                        user_name:"aliAli",
-                        id:"mlRNNURoZfNOB4Dc8qxlg4ORFWq1"
-                    },
-                    {
-                        user_name:"aziz",
-                        id:"a7Fr8ODkeKUMk0e73t4eQHkF6bE3"
-                    }
-                ]))
                const logginResponse =await fireBase.auth().signInWithEmailAndPassword(email,password)
                const id= logginResponse.user.uid
          
@@ -62,8 +47,12 @@ const model ={
                userDocResponse.onSnapshot(snapshot=>
                {
                      const userDoc= snapshot.docs[0].data()
-                     console.log({userDoc})
                      if( userDoc === undefined || userDoc === null) throw new Error('NO_USER')
+
+                     //set followed 
+                     localStorage.setItem('followed',JSON.stringify(userDoc.following))
+
+                     //set used doc
                      dispatch.auth.loggedIn(userDoc)
                      localStorage.setItem('user',JSON.stringify(userDoc))
                      dispatch.toast.add({message:LOGGED_IN,type:"SUCCESS"})
@@ -115,6 +104,7 @@ const model ={
                       const userDoc= snapshot.data()
                       console.log({userDoc})
                       if( userDoc=== undefined || userDoc=== null) throw new Error('NO_USER')
+                      localStorage.setItem('followed',JSON.stringify(userDoc.following))
                       dispatch.auth.signedIn(userDoc)
                       localStorage.setItem('user',JSON.stringify(userDoc))
                       dispatch.toast.add({message:SIGN_IN,type:"SUCCESS"})
