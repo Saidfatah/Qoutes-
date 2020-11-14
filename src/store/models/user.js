@@ -1,15 +1,17 @@
 import fireBase from '../../Common/Firebase/Firebase'
+import fireBaseNameSpace from 'firebase'
 import userModel from '../../Common/Firebase/models/user'
 import {USER_DOESNT_EXIST} from '../../Common/messages/errors'
-import { FOLLOWED,UNFOLLOWED,BLOCKED,UNBLOCKED} from '../../Common/messages/succes'
+import {IMAGE_UPLOAD,UPDATED,FOLLOWED,UNFOLLOWED,BLOCKED,UNBLOCKED} from '../../Common/messages/succes'
+import user from '../../Common/Firebase/models/user'
 
 const model ={
     state:{
-        accessible      : true,
         searched_users  : [],
         visited_user    : userModel(),
         follow          : false,
-        followed        : JSON.parse(localStorage.getItem('followed')),
+        followed        : JSON.parse(localStorage.getItem('followed')) || [],
+        blocked         : JSON.parse(localStorage.getItem('blocked')) || [],
         recommendation  :  null,
     }, 
     reducers:{
@@ -19,10 +21,13 @@ const model ={
         usersSearched      :(state,payload)=>({...state,searched_users:payload }),
         usersSearchFailed  :(state,payload)=>({...state,searched_users:[] }),
 
-        blocked            :(state,payload)=>({...state,accessible:false}),
-        unBlocked          :(state,payload)=>({...state,accessible:true }),
+        blocked            :(state,user)=>({...state , blocked:[...state.blocked,user]}),
+        unBlocked          :(state,user)=>({...state , blocked:state.blocked.filter(u=>u.id !== user.id)}),
 
-        toggledFollow      :(state,payload)=>({...state,follow:!state.users.follow}),
+        toggledFollow      :(state,payload)=>({
+            ...state,
+            followed:payload.followed
+        }),
 
         userFetchFailed:(state,payload)=>({...state,visited_user:null , recommendation : null}),
     },
@@ -80,38 +85,109 @@ const model ={
                  {
                        const userDoc= snapshot.docs[0].data()
                        if( userDoc === undefined || userDoc === null) throw new Error('NO_USER')
-                       dispatch.auth.profileVisited(userDoc)
+                       dispatch.users.profileVisited(userDoc)
                  })
             } catch (error) {
                 console.log(error)
                 if(error.message =="NO_USER") 
                    dispatch.toast.add({message:USER_DOESNT_EXIST,type:"DANGER"})
-                dispatch.auth.userFetchFailed()
+                dispatch.users.userFetchFailed()
             }
         },
-        async toggleFollow(id){
+        async toggleFollow({user,follow},state){
            try {
-                 dispatch.users.toggledFollow()
+                let  followed=null
+                let update = null
+                if(follow)
+                {
+                    followed =state.users.followed.filter(u=>u.id !== user.id)
+                    update ={
+                        following: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user)
+                    }
+                }else{
+                    followed =state.users.followed.push(user)
+                    update ={
+                        following: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user)
+                    }
+                }
+
+                localStorage.setItem('followed',JSON.stringify(followed))
+
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
+                const updateResponse= await targetUser.update(update)
+          
+                dispatch.users.toggledFollow(followed)
+                dispatch.toast.add(!follow?FOLLOWED:UNFOLLOWED,"SUCCESS")
+            } catch (error) {
+                 console.log(error)
+            }
+        },
+        async block(user,state){
+           try {
+                 const blockedArr= state.users.blocked
+                 localStorage.setItem('blocked',JSON.stringify(blockedArr.push(user)))
+
+                  const update ={
+                    blocked: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user)
+                  }
+                  
+                 const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
+                 const updateResponse= await targetUser.update(update)
+                 dispatch.users.blocked(user)
+                 dispatch.toast.add(BLOCKED,"SUCCESS")
             } catch (error) {
                 console.log(error)
             }
         },
-        async block(id){
-           try {
-               //modify blocked field
-               //{id,user_name}
+        async unBlock(user,state){
+            try {
+                const blockedArr= state.users.blocked
+                localStorage.setItem('blocked',JSON.stringify(blockedArr.filter(u=>u.id != user.id)))
+
+                const update ={
+                  blocked: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user)
+                }
+                
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
+                const updateResponse= await targetUser.update(update)
+                dispatch.users.unBlocked(user)
+                dispatch.toast.add(UNBLOCKED,"SUCCESS")
             } catch (error) {
                 console.log(error)
             }
         },
-        async unBlock(id){
-           try {
-                //modify blocked field
-               //remove obj from array
+        async upLoadProfileImage(image_file,state){
+            try {
+                if(image_file ==undefined || image_file == null) return 
+                console.log('uploading mage for ' + state.auth.user.user_name )
+                let image_url ='no_image'
+                const strageRef= fireBase.storage().ref()
+                const fileRef= strageRef.child(state.auth.user.user_name)
+                await fileRef.put(image_file)
+                image_url  = await fileRef.getDownloadURL()
+
+                //update image field
+                const update ={
+                     image: image_url
+                }
+                dispatch.auth.editUser(update)
+                dispatch.toast.add(IMAGE_UPLOAD,"SUCCESS")
             } catch (error) {
                 console.log(error)
             }
         },
+        async editUserProfile(update,state){
+           try {
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
+                const updateResponse= await targetUser.update(update)
+
+                dispatch.auth.edited({...user,...update})
+                dispatch.toast.add(UPDATED,"SUCCESS")
+            } catch (error) {
+                console.log(error)
+            }
+        },
+    
     })
 }
 export default model

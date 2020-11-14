@@ -16,17 +16,34 @@ const model ={
         loggedIn:(state,payload)=>({...state,user:payload ,IsAuthenticated : true}),
         signedIn:(state,payload)=>({...state,user:payload ,IsAuthenticated : true}),
 
+        editedUser:(state,edit)=>({...state,user:{...state.user,...edit} }),
+
         logginFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
         signupFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
     },
     effects: (dispatch)=>({
         async checkAuth(){
            try {
+                 localStorage.setItem('followed',JSON.stringify([
+                     {
+                     id:'a7Fr8ODkeKUMk0e73t4eQHkF6bE3',
+                     user_name:'Somiya',
+                     mage:'no_image'
+                    },
+                     {
+                     id:'mlRNNURoZfNOB4Dc8qxlg4ORFWq1',
+                     user_name:'AliJhones',
+                     mage:'no_image'
+                    },
+                     {
+                     id:'2OFAMNWk7ycLzaPVi3SJbJe7kBB3',
+                     user_name:'SAdifatah',
+                     mage:'no_image'
+                    },
+                ]))
                 fireBase.auth().onAuthStateChanged(user=>{
-                    console.log(user)
                      if(user)
                      {
-                         console.log('user logged')
                          const userDoc=JSON.parse(localStorage.getItem('user'))
                          dispatch.toast.add({message:WELLCOME+ " "+ userDoc.full_name ,type:"SUCCESS"})
                          return   dispatch.auth.loggedIn(userDoc)
@@ -53,8 +70,8 @@ const model ={
                      localStorage.setItem('followed',JSON.stringify(userDoc.following))
 
                      //set used doc
-                     dispatch.auth.loggedIn(userDoc)
-                     localStorage.setItem('user',JSON.stringify(userDoc))
+                     dispatch.auth.loggedIn({...userDoc,doc_id:snapshot.docs[0].id})
+                     localStorage.setItem('user',JSON.stringify({...userDoc,doc_id:snapshot.docs[0].id}))
                      dispatch.toast.add({message:LOGGED_IN,type:"SUCCESS"})
 
                })
@@ -102,11 +119,10 @@ const model ={
                 createUserDocResponse.onSnapshot(snapshot=>
                 {
                       const userDoc= snapshot.data()
-                      console.log({userDoc})
                       if( userDoc=== undefined || userDoc=== null) throw new Error('NO_USER')
-                      localStorage.setItem('followed',JSON.stringify(userDoc.following))
-                      dispatch.auth.signedIn(userDoc)
-                      localStorage.setItem('user',JSON.stringify(userDoc))
+                      localStorage.setItem('followed',JSON.stringify([]))
+                      dispatch.auth.signedIn({...userDoc,doc_id:snapshot.docs[0].id})
+                      localStorage.setItem('user',JSON.stringify({...userDoc,doc_id:snapshot.docs[0].id}))
                       dispatch.toast.add({message:SIGN_IN,type:"SUCCESS"})
                 })
 
@@ -122,6 +138,15 @@ const model ={
                     return dispatch.error.set({message:USER_NAME_EXISTS,id:"USER_EMAIL_EXISTS"})
                 }
                 dispatch.error.set({message:USER_CREATION_FAILED,id:"USER_CREATION_FAILED"})
+            }
+        },
+        async editUser(update,state){
+            try {
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
+                const updateResponse= await targetUser.update(update) 
+                dispatch.auth.editedUser(update)
+            } catch (error) {
+               console.log(error)
             }
         }
     })
