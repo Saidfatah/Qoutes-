@@ -16,7 +16,7 @@ export const Qoute = ({profileQuote,user,quote,remove,like,edit,reply,share,foll
     return (
         <div> 
              <QuotePostType {...{quote_publisher,user,profileQuote,shared_by,liked_by,followed}}/>
-             <QuotePublisher  {...{quote_publisher}} />
+             <QuotePublisher  {...{quote_publisher,profileQuote,user}} /> 
              <QuoteContent {...{quote_text,image}} />
              {profileQuote && quote_publisher.id !== user.id ? <p>qoute was shared</p> : null}
 

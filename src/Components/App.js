@@ -5,6 +5,7 @@ import Sidebar from '../Components/Layout/sidebar/Sidebar'
 import Toast from './Common/toast/Toast'
 import UserProfilRouter from './User/UserProfilRouter'
 import QuotesHome from './Qoutes/QuotesHome'
+import Redirect from './Common/Redirect/Redirect'
 
 import {
   BrowserRouter as Router,
@@ -14,16 +15,19 @@ import {
 
 import { connect } from 'react-redux';
 
-const  App=({checkAuth,user})=> {
+const  App=({checkAuth,IsAuthenticated})=> {
+
     useEffect(() => {
       checkAuth()
-   }, [])
+   }, [checkAuth])
 
+  
   return (
      <>
       <Router>
           <Toast />
-          <Sidebar />
+          { IsAuthenticated? <Sidebar />:null }
+         <Redirect />
           <Switch>
              <Route exact path="/" children={<QuotesHome />} />
              <Route exact path="/profile/:id" children={<UserProfilRouter />} />
@@ -34,4 +38,10 @@ const  App=({checkAuth,user})=> {
   );
 }
 
-export default connect(state=>({user:state.auth.user}),dispatch=>({checkAuth:dispatch.auth.checkAuth}))(App);
+export default connect(
+   state=>({
+      IsAuthenticated:state.auth.IsAuthenticated,
+      user:state.auth.user
+   }),
+   dispatch=>({checkAuth:dispatch.auth.checkAuth}))
+(App);

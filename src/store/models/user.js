@@ -11,6 +11,7 @@ const model ={
         visited_user    : userModel(),
         follow          : false,
         followed        : JSON.parse(localStorage.getItem('followed')) || [],
+        followers        : JSON.parse(localStorage.getItem('followers')) || [],
         blocked         : JSON.parse(localStorage.getItem('blocked')) || [],
         recommendation  :  null,
     }, 
@@ -178,10 +179,13 @@ const model ={
         },
         async editUserProfile(update,state){
            try {
-                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
-                const updateResponse= await targetUser.update(update)
+                const updateForFrestore= {...update}
+                if(updateForFrestore.birth_date) updateForFrestore.birth_date= fireBaseNameSpace.firestore.Timestamp.fromDate(updateForFrestore.birth_date)
 
-                dispatch.auth.edited({...user,...update})
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
+                const updateResponse= await targetUser.update(update)
+                
+                dispatch.auth.editUser(update)
                 dispatch.toast.add(UPDATED,"SUCCESS")
             } catch (error) {
                 console.log(error)

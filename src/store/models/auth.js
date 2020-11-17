@@ -70,8 +70,16 @@ const model ={
                      localStorage.setItem('followed',JSON.stringify(userDoc.following))
 
                      //set used doc
-                     dispatch.auth.loggedIn({...userDoc,doc_id:snapshot.docs[0].id})
-                     localStorage.setItem('user',JSON.stringify({...userDoc,doc_id:snapshot.docs[0].id}))
+                     dispatch.auth.loggedIn({
+                         ...userDoc,
+                         doc_id:snapshot.docs[0].id,
+                         birth_date:userDoc.birth_date.toDate() 
+                        })
+                     localStorage.setItem('user',JSON.stringify({
+                         ...userDoc,
+                         doc_id:snapshot.docs[0].id,
+                         birth_date:userDoc.birth_date.toDate() 
+                        }))
                      dispatch.toast.add({message:LOGGED_IN,type:"SUCCESS"})
 
                })
@@ -121,8 +129,16 @@ const model ={
                       const userDoc= snapshot.data()
                       if( userDoc=== undefined || userDoc=== null) throw new Error('NO_USER')
                       localStorage.setItem('followed',JSON.stringify([]))
-                      dispatch.auth.signedIn({...userDoc,doc_id:snapshot.docs[0].id})
-                      localStorage.setItem('user',JSON.stringify({...userDoc,doc_id:snapshot.docs[0].id}))
+                      dispatch.auth.signedIn({
+                          ...userDoc,
+                          doc_id:snapshot.docs[0].id,
+                          birth_date:userDoc.birth_date.toDate() 
+                        })
+                      localStorage.setItem('user',JSON.stringify({
+                          ...userDoc,
+                          doc_id:snapshot.docs[0].id,
+                          birth_date:userDoc.birth_date.toDate() 
+                        }))
                       dispatch.toast.add({message:SIGN_IN,type:"SUCCESS"})
                 })
 

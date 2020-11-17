@@ -1,15 +1,21 @@
 import React  from 'react'
-import { connect } from 'react-redux'
-import UserProfile from './UserProfile'
+import {connect} from 'react-redux'
+import MyProfile from './LoggedUser/MyProfile'
+import UserProfile from './Visited user/UserProfile'
+import {useParams} from "react-router-dom";
 
 //this component baisically if user to be fetched is the current logged user or not 
 //by comparing id it recieves from router params to auth.user.id
-
-export const UserProfilRouter = ({id,user}) => {
+//because if its current logged user we woul'dnt need to fetch data from firebase
+export const UserProfilRouter = ({user}) => {
+    let { id } = useParams();
     return (
         <div>
-            {/* {user && <UserProfile id={user.id} /> } */}
-            <UserProfile id={id}  user={user} />
+            {
+                id !== user.doc_id 
+                ?<UserProfile id={id}  />
+                :<MyProfile  user={user} />
+            }
         </div>
     )
 }
