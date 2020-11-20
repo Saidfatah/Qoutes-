@@ -95,12 +95,26 @@ const model ={
                 const user= state.auth.user
                 const qoutePublisher = QoutePublisherModel(user.id,user.image,user.user_name)
                 const qoute = QouteModel(message,qoutePublisher,tags,image)
+
                 const createQouteDocResponse= await fireBase
                                                    .firestore()
                                                    .collection('qoutes')
                                                    .add(qoute)
                 if(createQouteDocResponse.id == undefined) throw Error('QOUTE_CREATION_FAILED')
               
+                //update user tags if quote post contains tags 
+                if(tags.length)
+                {
+                    const userTags = [...state.auth.user.tags]
+                    const tagsIntersecion= userTags.filter(tag=> tags.indexOf(tag) <= -1 ) // new tags 
+                    if(tagsIntersecion.length)
+                    {
+                        userTags.push(...tagsIntersecion)
+                        const update ={ tags: fireBaseNameSpace.firestore.FieldValue.arrayUnion([...tagsIntersecion]) }
+                        dispatch.auth.editTags({update,tags:userTags})
+                    }
+                }
+
                 qoute.id=createQouteDocResponse.id
                 dispatch.quotes.added(qoute)
                 dispatch.toast.add({message:QOUTE_POSTED,type:"SUCCESS"})

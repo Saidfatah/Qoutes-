@@ -19,6 +19,7 @@ const model ={
         editedUser:(state,edit)=>({...state,user:{...state.user,...edit} }),
         editedfollowing:(state,following)=>({...state,user:{...state.user,following} }),
         editedBlocked:(state,blocked)=>({...state,user:{...state.user,blocked} }),
+        editedTags:(state,tags)=>({...state,user:{...state.user,tags} }),
 
         logginFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
         signupFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
@@ -128,20 +129,24 @@ const model ={
                 //check if user doc was created and get it 
                 createUserDocResponse.onSnapshot(snapshot=>
                 {
-                      const userDoc= snapshot.data()
-                      if( userDoc=== undefined || userDoc=== null) throw new Error('NO_USER')
-                      localStorage.setItem('followed',JSON.stringify([]))
-                      dispatch.auth.signedIn({
+                    const userDoc= snapshot.data()
+                    const docs =snapshot.data()
+
+                    if( userDoc=== undefined || userDoc=== null) throw new Error('NO_USER')
+
+                    localStorage.setItem('followed',JSON.stringify([]))
+                    dispatch.auth.signedIn({
                           ...userDoc,
-                          doc_id:snapshot.docs[0].id,
+                          doc_id:snapshot.id,
                           birth_date:userDoc.birth_date.toDate() 
-                        })
-                      localStorage.setItem('user',JSON.stringify({
-                          ...userDoc,
-                          doc_id:snapshot.docs[0].id,
-                          birth_date:userDoc.birth_date.toDate() 
-                        }))
-                      dispatch.toast.add({message:SIGN_IN,type:"SUCCESS"})
+                    })
+                    localStorage.setItem('user',JSON.stringify({
+                        ...userDoc,
+                        doc_id:snapshot.id,
+                        birth_date:userDoc.birth_date.toDate() 
+                    }))
+                    
+                    dispatch.toast.add({message:SIGN_IN,type:"SUCCESS"})
                 })
 
             } catch (error) {
@@ -158,10 +163,12 @@ const model ={
                 dispatch.error.set({message:USER_CREATION_FAILED,id:"USER_CREATION_FAILED"})
             }
         },
-        async editUser(update,state){
+        async editUser({update},state){
             try {
+                console.log(update)
                 const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
                 const updateResponse= await targetUser.update(update) 
+
                 dispatch.auth.editedUser(update)
                 dispatch.toast.add("UPDATED","SUCCESS")
             } catch (error) {
@@ -174,6 +181,17 @@ const model ={
                 const updateResponse= await targetUser.update(update) 
 
                 dispatch.auth.editedfollowing(following)
+                dispatch.toast.add("UPDATED","SUCCESS")
+            } catch (error) {
+               console.log(error)
+            }
+        },
+        async editTags({update,tags},state){
+            try {
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
+                const updateResponse= await targetUser.update(update) 
+
+                dispatch.auth.editedTags(tags)
                 dispatch.toast.add("UPDATED","SUCCESS")
             } catch (error) {
                console.log(error)

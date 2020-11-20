@@ -12,6 +12,8 @@ const user =( id , full_name, user_name, email,birth_date ,country)=> ({
     blocked    : [],
     following  : [],
     likes      : [],
-    quotes     : [],//if one of these qooutes ownerèid is not equal to current user id in profil then we know it was shared 
+    tags       : []
 })
 export default user
+
+
