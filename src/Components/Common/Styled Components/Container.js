@@ -13,3 +13,8 @@ align-items:center;
 padding:1rem;
 margin_bottom:${(props)=>props.mgb? props.mgb :0}rem;
 `
+export const AutoSuggestionContainer = styled.div`
+   ul,ol{
+       list-style : none;
+   }
+`

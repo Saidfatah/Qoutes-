@@ -2,7 +2,7 @@ import React,{useState,useEffect}  from 'react'
 import { connect } from 'react-redux'
 import SearchSuggestion from './SearchSuggestion'
 import Autosuggest from 'react-autosuggest';
-
+import {AutoSuggestionContainer} from '../../../Common/Styled Components/Container'
 
 
 
@@ -38,7 +38,7 @@ export const UserSearch = ({suggested_users,suggestUsers,clearSuggestedUser}) =>
   
 
     return (
-        <div>
+        <AutoSuggestionContainer>
              <Autosuggest
                suggestions={suggestions}
                onSuggestionsFetchRequested={onSuggestionsFetchRequested}
@@ -47,7 +47,7 @@ export const UserSearch = ({suggested_users,suggestUsers,clearSuggestedUser}) =>
                renderSuggestion={SearchSuggestion}
                inputProps={inputProps}
              />
-        </div>
+        </AutoSuggestionContainer>
     )
 }
 
