@@ -8,24 +8,28 @@ import user from '../../Common/Firebase/models/user'
 const model ={
     state:{
         searched_users  : [],
+        suggested_users : null,
         visited_user    : userModel(),
         follow          : false,
         followed        : JSON.parse(localStorage.getItem('followed')) || [],
-        followers        : JSON.parse(localStorage.getItem('followers')) || [],
+        followers       : JSON.parse(localStorage.getItem('followers')) || [],
         blocked         : JSON.parse(localStorage.getItem('blocked')) || [],
-        recommendation  :  null,
+        recommendation  : null,
     }, 
     reducers:{
-        fetchedRecommended :(state,payload)=>({...state,visited_user:payload }),
-        profileVisited     :(state,payload)=>({...state,visited_user:payload }),
-        
-        usersSearched      :(state,payload)=>({...state,searched_users:payload }),
-        usersSearchFailed  :(state,payload)=>({...state,searched_users:[] }),
+        fetchedRecommended   :(state,payload)=>({...state,visited_user:payload }),
+        profileVisited       :(state,payload)=>({...state,visited_user:payload }),
+          
+        usersSuggested        :(state,payload)=>({...state,suggested_users:payload }),
+        SuggestedUserCleared :(state,payload)=>({...state,suggested_users:null }),
 
-        blocked            :(state,user)=>({...state , blocked:[...state.blocked,user]}),
-        unBlocked          :(state,user)=>({...state , blocked:state.blocked.filter(u=>u.id !== user.id)}),
-
-        toggledFollow      :(state,payload)=>({
+        usersSearched        :(state,payload)=>({...state,searched_users:[...state.searched_users,payload] }),
+        usersSearchFailed    :(state,payload)=>({...state,searched_users:[] }),
+  
+        blocked              :(state,user)=>({...state , blocked:[...state.blocked,user]}),
+        unBlocked            :(state,user)=>({...state , blocked:state.blocked.filter(u=>u.id !== user.id)}),
+  
+        toggledFollow        :(state,payload)=>({
             ...state,
             followed:payload.followed
         }),
@@ -46,7 +50,7 @@ const model ={
                 recommendedResponse.onSnapshot(snapshot=>
                 {
                         const recommendedFilterdFromAlreadyFollowed = snapshot.docs.map(user=> !user.followers.includes(currentUserId))
-                        dispatch.auth.profileVisited(recommendedFilterdFromAlreadyFollowed)
+                        dispatch.users.profileVisited(recommendedFilterdFromAlreadyFollowed)
                 })
               
             } catch (error) {
@@ -67,13 +71,48 @@ const model ={
                 {
                     const userDoc= snapshot.docs[0].data()
                     if( userDoc === undefined || userDoc === null) throw new Error('NO_USER')
-                    dispatch.auth.usersSearched(userDoc)
+                    dispatch.users.usersSearched(userDoc)
                 })
             } catch (error) {
                 console.log(error)
                 if(error.message =="NO_USER") 
                    dispatch.toast.add({message:USER_DOESNT_EXIST,type:"DANGER"})
                 dispatch.auth.usersSearchFailed()
+            }
+        },
+        async suggestUsers(full_name,state){
+           try {
+               
+                const users = [
+                     {
+                       full_name: 'aziz fatah',
+                       id: '2OFAMNWk7ycLzaPVi3SJbJe7kBB3',
+                       image: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'
+                     },
+                    {
+                       full_name: 'Said fatah',
+                       id: 'azgDma3eN9Nvo5HOKquxPRitOK23',
+                       image: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80'
+                     },
+                    {
+                       full_name: 'mohamed fatah',
+                       id: 'a7Fr8ODkeKUMk0e73t4eQHkF6bE3',
+                       image: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80'
+                     },
+                ];
+                const matchedUsers=  users.filter(u=>u.full_name.indexOf(full_name) > -1)
+                console.log({matchedUsers})
+                dispatch.users.usersSuggested(matchedUsers)
+            } catch (error) {
+                console.log(error)
+                dispatch.auth.usersSearchFailed()
+            }
+        },
+        async clearSuggestedUser(user_name,state){
+           try {
+                dispatch.users.SuggestedUserCleared()
+            } catch (error) {
+                console.log(error)
             }
         },
         async visitProfile(id){
@@ -186,7 +225,7 @@ const model ={
                 const updateResponse= await targetUser.update(update)
                 
                 dispatch.auth.editUser(update)
-                dispatch.toast.add(UPDATED,"SUCCESS")
+                dispatch.toast.add("UPDATED","SUCCESS")
             } catch (error) {
                 console.log(error)
             }

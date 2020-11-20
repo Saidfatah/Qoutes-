@@ -9,9 +9,7 @@ import {Submit} from '../../Common/Styled Components/Buttons'
 
 
 const UpdateUserProfile=({user,editUserProfile,ProfileUpdateModalDisplay, setProfileUpdateModalDisplay})=> {
-  
     const {full_name,country,birth_date,bio} = user 
-    console.log({full_name,country,birth_date,bio} )
     const [userInfo, setuserInfo] = useState({...{full_name,country,birth_date,bio}})
     const [accumulatedUpdate, setaccumulatedUpdate] = useState({})
    
@@ -44,10 +42,15 @@ const UpdateUserProfile=({user,editUserProfile,ProfileUpdateModalDisplay, setPro
                          onChange={onchangeHandler('bio')} 
                      />
                      <InputWrapper>
-                         <DatePicker selected={new Date(userInfo.birth_date)} onChange={date => {
+                         <label for="birth_date">birth date :</label>
+                         <DatePicker
+                             name="birth_date"
+                             selected={new Date(userInfo.birth_date)} 
+                             onChange={date => {
                               setuserInfo({...userInfo,birth_date:date})
                               setaccumulatedUpdate({...accumulatedUpdate,birth_date:date})
-                         }} />
+                             }} 
+                         />
                      </InputWrapper>
                      <Submit type="submit" width="100%">Submit</Submit>
                 </Flex>

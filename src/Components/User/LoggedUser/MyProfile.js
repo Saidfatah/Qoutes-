@@ -3,6 +3,7 @@ import UserImageUploader from './UserImageUploader'
 import UpdateUserProfile from './UpdateUserProfile'
 import UserInfo from '../../Common/user/UserInfo'
 import UserImage from '../../Common/user/UserImage'
+import UserSearch  from '../users/search/UserSearch'
 import {connect} from 'react-redux'
 
 const MyProfile=({user,upLoadProfileImage,editUserProfile})=> {
@@ -15,6 +16,7 @@ const MyProfile=({user,upLoadProfileImage,editUserProfile})=> {
     return (
         <div>
             my profile
+            <UserSearch />
             <UserInfo {...{full_name,user_name}} />
             <UserImage {...{image}} />
 

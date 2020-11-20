@@ -1,7 +1,7 @@
 import React from 'react'
 import UserImage from '../Common/user/UserImage'
 import UserInfo from '../Common/user/UserInfo'
-import {Flex} from '../Common/containers/styled'
+import {Flex} from '../Common/Styled Components/Container'
 
 const UserBall=({briefUserInfo})=> {
     const {image,full_name,user_name}= briefUserInfo

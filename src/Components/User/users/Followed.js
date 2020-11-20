@@ -1,6 +1,6 @@
 import React  from 'react'
 import { connect } from 'react-redux'
-import UserBall from './UserBall'
+import UserBall from '../UserBall'
 import {Flex} from '../Common/containers/styled'
 
 //implement infinite scrool here too 
