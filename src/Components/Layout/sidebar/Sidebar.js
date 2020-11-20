@@ -15,7 +15,7 @@ export const Sidebar = ({user,IsAuthenticated,logout}) => {
              <p> {IsAuthenticated ? user.full_name :"no user logged" }</p>
              {
                  IsAuthenticated 
-                 ?<button onClick={logout}>logout</button>
+                 ?<Link to="/" onClick={logout}>logout</Link>
                  :null
              }
         </div>

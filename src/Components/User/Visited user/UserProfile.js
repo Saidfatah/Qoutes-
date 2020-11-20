@@ -14,7 +14,7 @@ export const UserProfile = ({user,id,visited_user,visitProfile,toggleFollow,bloc
 
     const {full_name,user_name,email,country,birth_date,bio,image,blocked,followers,following,likes,quotes}=visited_user 
 
-    if(blocked.indexOf(user.id)>-1  || user.blocked.indexOf(id)>-1  ) return <div>You can't see this content </div>
+    if( blocked.filter(u=>u.id == user.id )[0] != undefined   || user.blocked.filter(u=>u.id == id )[0] != undefined  ) return <div>You can't see this content </div>
  
     console.log(user)
     const followed=  user && user.following.filter(u=>u.id == id)[0] != undefined 

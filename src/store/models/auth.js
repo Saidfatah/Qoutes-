@@ -18,6 +18,7 @@ const model ={
 
         editedUser:(state,edit)=>({...state,user:{...state.user,...edit} }),
         editedfollowing:(state,following)=>({...state,user:{...state.user,following} }),
+        editedBlocked:(state,blocked)=>({...state,user:{...state.user,blocked} }),
 
         logginFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
         signupFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
@@ -46,7 +47,7 @@ const model ={
                      if(user)
                      {
                          const userDoc=JSON.parse(localStorage.getItem('user'))
-                         dispatch.toast.add({message:WELLCOME+ " "+ userDoc.full_name ,type:"SUCCESS"})
+                         if(userDoc) dispatch.toast.add({message:WELLCOME+ " "+ userDoc.full_name ,type:"SUCCESS"})
                          return   dispatch.auth.loggedIn(userDoc)
                      }
                 })
@@ -177,7 +178,18 @@ const model ={
             } catch (error) {
                console.log(error)
             }
-        }
+        },
+        async editBlocked({update,blocked},state){
+            try {
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
+                const updateResponse= await targetUser.update(update) 
+
+                dispatch.auth.editedBlocked(blocked)
+                dispatch.toast.add("UPDATED","SUCCESS")
+            } catch (error) {
+               console.log(error)
+            }
+        },
     })
 }
 export default model

@@ -152,7 +152,10 @@ const model ={
         async block(user,state){
            try {
                  const update ={ blocked: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
-                 dispatch.auth.editUser(update)
+                 let blocked= [...state.auth.user.blocked]
+                 blocked.push(user)
+                
+                 dispatch.auth.editBlocked({update, blocked})
                  dispatch.toast.add(BLOCKED,"SUCCESS")
             } catch (error) {
                 console.log(error)
@@ -160,9 +163,11 @@ const model ={
         },
         async unBlock(user,state){
             try {
-                const update ={ blocked: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
                 
-                dispatch.auth.editUser(update)
+                const update ={ blocked: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
+                const blocked= state.auth.user.blocked.filter(u=>u.id != user.id)
+
+                dispatch.auth.editBlocked({update, blocked})
                 dispatch.toast.add(BLOCKED,"SUCCESS")
             } catch (error) {
                 console.log(error)

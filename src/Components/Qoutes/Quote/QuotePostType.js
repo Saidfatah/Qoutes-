@@ -9,8 +9,12 @@ import React from 'react'
 
 //so the shared liked thng wll only be applied to qoutes of users that are not followed by current user 
 const QoutePostType=({quote_publisher,user,profileQuote,shared_by,liked_by,followed})=> {
+
+    if(!followed) return null
+
     const followedIds= followed.map(user=>user.id)
     let userId= null; 
+
     let isShared = shared_by.filter(id => {
         if(followedIds.includes(id)){
            userId=id;
