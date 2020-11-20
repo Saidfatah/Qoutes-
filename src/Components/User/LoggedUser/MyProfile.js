@@ -1,6 +1,7 @@
 import React,{useState} from 'react'
 import UserImageUploader from './UserImageUploader'
 import UpdateUserProfile from './UpdateUserProfile'
+import UsersRecommended from '../users/UsersRecommended'
 import UserInfo from '../../Common/user/UserInfo'
 import UserImage from '../../Common/user/UserImage'
 import UserSearch  from '../users/search/UserSearch'
@@ -24,6 +25,7 @@ const MyProfile=({user,upLoadProfileImage,editUserProfile})=> {
             <button onClick={e=>setProfileUpdateModalDisplay(true)} >update profile info </button>
             <UserImageUploader {...{user,upLoadProfileImage,imageUploadModalDislay, setimageUploadModalDislay}} />
             <UpdateUserProfile {...{user,editUserProfile,ProfileUpdateModalDisplay, setProfileUpdateModalDisplay}} />
+            <UsersRecommended />
         </div>
     )
 }

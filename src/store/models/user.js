@@ -13,7 +13,7 @@ const model ={
         recommendation  : null,
     }, 
     reducers:{
-        fetchedRecommended   :(state,payload)=>({...state,visited_user:payload }),
+        fetchedRecommended   :(state,payload)=>({...state,recommendation:payload }),
         profileVisited       :(state,payload)=>({...state,visited_user:payload }),
           
         usersSuggested        :(state,payload)=>({...state,suggested_users:payload }),
@@ -26,25 +26,28 @@ const model ={
     },
     effects: (dispatch)=>({
         async fecthRecommend(id,state){
-            //first fetch all users that are not followed 
-            //then we filter thes user based on who they follow and their followers
-            //get users that are followed by the users wer"e following 
-            //get users following our flollwers
-            //get users following the users we're following 
-            //get users who use simmilaire tags 
-           try {
-                const followedUsersIds = state.users.followed.map(u=>u.id)
+            try {
+                const followedUsersIds   = state.auth.followed.map(u=>u.id)
+                const followingUsersIds  = state.auth.following.map(u=>u.id)
                 const currentUserId      = state.auth.user.id
-                return console.log({followedUsersIds ,currentUserId })
 
                 const recommendedResponse = await fireBase
                                             .firestore()
                                             .collection('users')
-                                            .where('followers','array-contains',followedUsersIds)
+                                            .where('id','not-in',[...followedUsersIds])
+                                         
+
                 recommendedResponse.onSnapshot(snapshot=>
                 {
-                        const recommendedFilterdFromAlreadyFollowed = snapshot.docs.map(user=> !user.followers.includes(currentUserId))
-                        dispatch.users.profileVisited(recommendedFilterdFromAlreadyFollowed)
+                        const recommended= snapshot.docs.map(user=> (
+                            {
+                                image:user.data().image,
+                                doc_id:user.id,
+                                id:user.data().id,
+                                full_name:user.data().full_name,
+                                user_name:user.data().user_name,
+                            }))
+                        dispatch.users.fetchedRecommended(recommended)
                 })
               
             } catch (error) {
