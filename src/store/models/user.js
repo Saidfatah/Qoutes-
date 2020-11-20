@@ -10,10 +10,6 @@ const model ={
         searched_users  : [],
         suggested_users : null,
         visited_user    : userModel(),
-        follow          : false,
-        followed        : JSON.parse(localStorage.getItem('followed')) || [],
-        followers       : JSON.parse(localStorage.getItem('followers')) || [],
-        blocked         : JSON.parse(localStorage.getItem('blocked')) || [],
         recommendation  : null,
     }, 
     reducers:{
@@ -25,19 +21,17 @@ const model ={
 
         usersSearched        :(state,payload)=>({...state,searched_users:[...state.searched_users,payload] }),
         usersSearchFailed    :(state,payload)=>({...state,searched_users:[] }),
-  
-        blocked              :(state,user)=>({...state , blocked:[...state.blocked,user]}),
-        unBlocked            :(state,user)=>({...state , blocked:state.blocked.filter(u=>u.id !== user.id)}),
-  
-        toggledFollow        :(state,payload)=>({
-            ...state,
-            followed:payload.followed
-        }),
 
         userFetchFailed:(state,payload)=>({...state,visited_user:null , recommendation : null}),
     },
     effects: (dispatch)=>({
         async fecthRecommend(id,state){
+            //first fetch all users that are not followed 
+            //then we filter thes user based on who they follow and their followers
+            //get users that are followed by the users wer"e following 
+            //get users following our flollwers
+            //get users following the users we're following 
+            //get users who use simmilaire tags 
            try {
                 const followedUsersIds = state.users.followed.map(u=>u.id)
                 const currentUserId      = state.auth.user.id
@@ -135,28 +129,21 @@ const model ={
             }
         },
         async toggleFollow({user,follow},state){
-           try {
-                let  followed=null
-                let update = null
+            try {
+                let  update  = null 
+                let  following = [...state.auth.user.following]
+                console.log({following})
+
                 if(follow)
                 {
-                    followed =state.users.followed.filter(u=>u.id !== user.id)
-                    update ={
-                        following: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user)
-                    }
+                    following = [...following.filter(u=>u.id != user.id )]
+                    update ={ following: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
                 }else{
-                    followed =state.users.followed.push(user)
-                    update ={
-                        following: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user)
-                    }
+                    following.push(user)
+                    update ={ following: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
                 }
 
-                localStorage.setItem('followed',JSON.stringify(followed))
-
-                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
-                const updateResponse= await targetUser.update(update)
-          
-                dispatch.users.toggledFollow(followed)
+                dispatch.auth.editFollowing({update,following})
                 dispatch.toast.add(!follow?FOLLOWED:UNFOLLOWED,"SUCCESS")
             } catch (error) {
                  console.log(error)
@@ -164,16 +151,8 @@ const model ={
         },
         async block(user,state){
            try {
-                 const blockedArr= state.users.blocked
-                 localStorage.setItem('blocked',JSON.stringify(blockedArr.push(user)))
-
-                  const update ={
-                    blocked: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user)
-                  }
-                  
-                 const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
-                 const updateResponse= await targetUser.update(update)
-                 dispatch.users.blocked(user)
+                 const update ={ blocked: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
+                 dispatch.auth.editUser(update)
                  dispatch.toast.add(BLOCKED,"SUCCESS")
             } catch (error) {
                 console.log(error)
@@ -181,17 +160,10 @@ const model ={
         },
         async unBlock(user,state){
             try {
-                const blockedArr= state.users.blocked
-                localStorage.setItem('blocked',JSON.stringify(blockedArr.filter(u=>u.id != user.id)))
-
-                const update ={
-                  blocked: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user)
-                }
+                const update ={ blocked: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
                 
-                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.id)
-                const updateResponse= await targetUser.update(update)
-                dispatch.users.unBlocked(user)
-                dispatch.toast.add(UNBLOCKED,"SUCCESS")
+                dispatch.auth.editUser(update)
+                dispatch.toast.add(BLOCKED,"SUCCESS")
             } catch (error) {
                 console.log(error)
             }
@@ -220,12 +192,7 @@ const model ={
            try {
                 const updateForFrestore= {...update}
                 if(updateForFrestore.birth_date) updateForFrestore.birth_date= fireBaseNameSpace.firestore.Timestamp.fromDate(updateForFrestore.birth_date)
-
-                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
-                const updateResponse= await targetUser.update(update)
-                
                 dispatch.auth.editUser(update)
-                dispatch.toast.add("UPDATED","SUCCESS")
             } catch (error) {
                 console.log(error)
             }

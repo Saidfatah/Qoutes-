@@ -17,6 +17,7 @@ const model ={
         signedIn:(state,payload)=>({...state,user:payload ,IsAuthenticated : true}),
 
         editedUser:(state,edit)=>({...state,user:{...state.user,...edit} }),
+        editedfollowing:(state,following)=>({...state,user:{...state.user,following} }),
 
         logginFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
         signupFailed:(state,payload)=>({...state,user:null,IsAuthenticated : false}),
@@ -161,6 +162,18 @@ const model ={
                 const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
                 const updateResponse= await targetUser.update(update) 
                 dispatch.auth.editedUser(update)
+                dispatch.toast.add("UPDATED","SUCCESS")
+            } catch (error) {
+               console.log(error)
+            }
+        },
+        async editFollowing({update,following},state){
+            try {
+                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
+                const updateResponse= await targetUser.update(update) 
+
+                dispatch.auth.editedfollowing(following)
+                dispatch.toast.add("UPDATED","SUCCESS")
             } catch (error) {
                console.log(error)
             }
