@@ -12,11 +12,10 @@ export const UserProfile = ({user,id,visited_user,visitProfile,toggleFollow,bloc
 
     if( visited_user === null) return <div>loading user info </div>
 
-    const {full_name,user_name,email,country,birth_date,bio,image,blocked,followers,following,likes,quotes}=visited_user 
+    const {full_name,user_name,email,country,birth_date,bio,image,blocked,followers,following,likes,quotes,doc_id}=visited_user 
 
     if( blocked.filter(u=>u.id == user.id )[0] != undefined   || user.blocked.filter(u=>u.id == id )[0] != undefined  ) return <div>You can't see this content </div>
  
-    console.log(user)
     const followed=  user && user.following.filter(u=>u.id == id)[0] != undefined 
 
     return (
@@ -26,7 +25,7 @@ export const UserProfile = ({user,id,visited_user,visitProfile,toggleFollow,bloc
 
             <button 
                   onClick={e=>toggleFollow({
-                      user   : {id,full_name,user_name,image},
+                      user   : {doc_id,id,full_name,user_name,image,followers},
                       follow : followed
                   })}>  
                   {

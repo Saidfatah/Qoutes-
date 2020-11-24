@@ -14,7 +14,7 @@ export const UsersRecommended = ({fecthRecommend,recommendation}) => {
     return (
         <div>
             {
-                recommendation.map(user=> <UserBall {...
+                recommendation.map(user=> <UserBall key={user.id} {...
                 {
                     briefUserInfo:{
                     full_name:user.full_name,

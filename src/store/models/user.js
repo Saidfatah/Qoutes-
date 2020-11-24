@@ -3,7 +3,8 @@ import fireBaseNameSpace from 'firebase'
 import userModel from '../../Common/Firebase/models/user'
 import {USER_DOESNT_EXIST} from '../../Common/messages/errors'
 import {IMAGE_UPLOAD,UPDATED,FOLLOWED,UNFOLLOWED,BLOCKED,UNBLOCKED} from '../../Common/messages/succes'
-import user from '../../Common/Firebase/models/user'
+
+const ids=users=>users.map(u=>u.id)
 
 const model ={
     state:{
@@ -13,48 +14,73 @@ const model ={
         recommendation  : null,
     }, 
     reducers:{
-        fetchedRecommended   :(state,payload)=>({...state,recommendation:payload }),
-        profileVisited       :(state,payload)=>({...state,visited_user:payload }),
-          
-        usersSuggested        :(state,payload)=>({...state,suggested_users:payload }),
-        SuggestedUserCleared :(state,payload)=>({...state,suggested_users:null }),
+        fetchedRecommended        : (state,payload)=>({...state,recommendation:payload }),
+        fetchRecommendedFailed    : (state,payload)=>({...state,recommendation:null }),
 
-        usersSearched        :(state,payload)=>({...state,searched_users:[...state.searched_users,payload] }),
-        usersSearchFailed    :(state,payload)=>({...state,searched_users:[] }),
-
-        userFetchFailed:(state,payload)=>({...state,visited_user:null , recommendation : null}),
-    },
+        profileVisited            : (state,payload)=>({...state,visited_user:payload }),
+           
+        usersSuggested            : (state,payload)=>({...state,suggested_users:payload }),
+        SuggestedUserCleared      : (state,payload)=>({...state,suggested_users:null }),
+ 
+        usersSearched             : (state,payload)=>({...state,searched_users:[...state.searched_users,payload] }),
+        usersSearchFailed         : (state,payload)=>({...state,searched_users:[] }),
+ 
+        userFetchFailed           : (state,payload)=>({...state,visited_user:null , recommendation : null}),
+    }, 
     effects: (dispatch)=>({
         async fecthRecommend(id,state){
             try {
-                const followedUsersIds   = state.auth.followed.map(u=>u.id)
-                const followingUsersIds  = state.auth.following.map(u=>u.id)
-                const currentUserId      = state.auth.user.id
-
+                const followedUsersIds    = ids(state.auth.user.following)
+                const followersIds        = ids(state.auth.user.followers)
+                const blockedUsersIds     = ids(state.auth.user.blocked)
+                const currentUserId       = state.auth.user.id
+               
+                //exclude current user and followed users 
+                //exclude users we're following 
+                //exclude users we have blocked             
                 const recommendedResponse = await fireBase
                                             .firestore()
                                             .collection('users')
-                                            .where('id','not-in',[...followedUsersIds])
+                                            .where('id','not-in',[...followedUsersIds,...blockedUsersIds,currentUserId])
                                          
 
                 recommendedResponse.onSnapshot(snapshot=>
                 {
-                        const recommended= snapshot.docs.map(user=> (
+                        let recommended = snapshot.docs.map(user=> (
                             {
-                                image:user.data().image,
-                                doc_id:user.id,
-                                id:user.data().id,
-                                full_name:user.data().full_name,
-                                user_name:user.data().user_name,
+                                image     : user.data().image ,
+                                doc_id    : user.id ,
+                                id        : user.data().id ,
+                                full_name : user.data().full_name ,
+                                user_name : user.data().user_name ,
+                                following : user.data().following ,
+                                followers : user.data().followers , 
+                                blocked   : user.data().blocked , 
                             }))
+
+                        //exclude users who have blocked us
+                        recommended  = [...recommended.filter(u=> !ids(u.blocked).includes(currentUserId) )]
+
+                        // here we choose to either recommend (users followed by users we follow) or (users who follow users we follow ) randomly (1- 0)    
+                        // if(Math.round(Math.random()) == 0)
+                        // {
+                        //     //users followed by users we follow    
+                        //     recommended  = [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
+                        // }else{
+                        //     //users who follow users we follow 
+                        //     recommended  = [...recommended.filter(u=> ids(u.following).some( f => followedUsersIds.includes(f)) )]
+                        // }
+
+                        // recommended  = [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
+                        recommended  = [...recommended.filter(u=> ids(u.following).some( f => followedUsersIds.includes(f)) )]
+
                         dispatch.users.fetchedRecommended(recommended)
                 })
               
             } catch (error) {
                 console.log(error)
-                if(error.message =="NO_USER") 
-                   dispatch.toast.add({message:USER_DOESNT_EXIST,type:"DANGER"})
-                dispatch.auth.userFetchFailed()
+                if(error.message =="NO_USER")  dispatch.toast.add({message:USER_DOESNT_EXIST,type:"DANGER"})     
+                dispatch.users.fetchRecommendedFailed()
             }
         },
         async searchUsers(user_name,state){
@@ -118,12 +144,14 @@ const model ={
                                              .firestore()
                                              .collection('users')
                                              .where('id','==',id)
+
                  userDocResponse.onSnapshot(snapshot=>
                  {
                        const userDoc= snapshot.docs[0].data()
                        if( userDoc === undefined || userDoc === null) throw new Error('NO_USER')
-                       dispatch.users.profileVisited(userDoc)
+                       dispatch.users.profileVisited({...userDoc,doc_id:snapshot.docs[0].id})
                  })
+
             } catch (error) {
                 console.log(error)
                 if(error.message =="NO_USER") 
@@ -133,20 +161,27 @@ const model ={
         },
         async toggleFollow({user,follow},state){
             try {
-                let  update  = null 
+                let  CurrentUserupdate = null 
+                let  visitedUserupdate = null 
                 let  following = [...state.auth.user.following]
-                console.log({following})
 
+                //update following array if current user
                 if(follow)
                 {
                     following = [...following.filter(u=>u.id != user.id )]
-                    update ={ following: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
+                    CurrentUserupdate ={ following: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
+                    visitedUserupdate ={ followers: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
                 }else{
                     following.push(user)
-                    update ={ following: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
+                    CurrentUserupdate ={ following: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
+                    visitedUserupdate ={ followers: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
                 }
 
-                dispatch.auth.editFollowing({update,following})
+                //update visted followers 
+                const docRef          = await fireBase.firestore().collection('users').doc(user.doc_id)
+                const updateResponse  = await docRef.update(visitedUserupdate) 
+
+                dispatch.auth.editFollowing({CurrentUserupdate,following})
                 dispatch.toast.add(!follow?FOLLOWED:UNFOLLOWED,"SUCCESS")
             } catch (error) {
                  console.log(error)
