@@ -34,7 +34,9 @@ const model ={
                 const followersIds        = ids(state.auth.user.followers)
                 const blockedUsersIds     = ids(state.auth.user.blocked)
                 const currentUserId       = state.auth.user.id
-               
+                const currentUserTags     = state.auth.user.tags
+                console.log(state.auth.user)
+
                 //exclude current user and followed users 
                 //exclude users we're following 
                 //exclude users we have blocked             
@@ -46,7 +48,7 @@ const model ={
 
                 recommendedResponse.onSnapshot(snapshot=>
                 {
-                        let recommended = snapshot.docs.map(user=> (
+                     let recommended   = snapshot.docs.map(user=> (
                             {
                                 image     : user.data().image ,
                                 doc_id    : user.id ,
@@ -54,27 +56,32 @@ const model ={
                                 full_name : user.data().full_name ,
                                 user_name : user.data().user_name ,
                                 following : user.data().following ,
+                                tags      : user.data().tags , 
                                 followers : user.data().followers , 
                                 blocked   : user.data().blocked , 
                             }))
 
-                        //exclude users who have blocked us
-                        recommended  = [...recommended.filter(u=> !ids(u.blocked).includes(currentUserId) )]
+                     //exclude users who have blocked us
+                     recommended       = [...recommended.filter(u=> !ids(u.blocked).includes(currentUserId) )]
 
-                        // here we choose to either recommend (users followed by users we follow) or (users who follow users we follow ) randomly (1- 0)    
-                        // if(Math.round(Math.random()) == 0)
-                        // {
-                        //     //users followed by users we follow    
-                        //     recommended  = [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
-                        // }else{
-                        //     //users who follow users we follow 
-                        //     recommended  = [...recommended.filter(u=> ids(u.following).some( f => followedUsersIds.includes(f)) )]
-                        // }
+  
+                     const usersFollowedByUsersWeFollow =  [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
+                     const usersWhoFollowUsersWeFollow  =  [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
+                     const usersWhoUseSameTags          =  [...recommended.filter(u=> u.tags.some(f => currentUserTags.includes(f)))]
+                     
+                     console.log({usersFollowedByUsersWeFollow})
+                     console.log({usersWhoFollowUsersWeFollow})
+                     console.log({usersWhoUseSameTags})
+                     //either this or that randomly  
+                    //  if(Math.round(Math.random()) == 0)
+                    //  {
+                      
+                    //  }else{
+                         
+                    //  }
 
-                        // recommended  = [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
-                        recommended  = [...recommended.filter(u=> ids(u.following).some( f => followedUsersIds.includes(f)) )]
 
-                        dispatch.users.fetchedRecommended(recommended)
+                     dispatch.users.fetchedRecommended(recommended)
                 })
               
             } catch (error) {
