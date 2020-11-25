@@ -31,20 +31,19 @@ const model ={
         async fecthRecommend(id,state){
             try {
                 const followedUsersIds    = ids(state.auth.user.following)
-                const followersIds        = ids(state.auth.user.followers)
                 const blockedUsersIds     = ids(state.auth.user.blocked)
                 const currentUserId       = state.auth.user.id
                 const currentUserTags     = state.auth.user.tags
-                console.log(state.auth.user)
 
                 //exclude current user and followed users 
                 //exclude users we're following 
-                //exclude users we have blocked             
+                //exclude users we have blocked   
                 const recommendedResponse = await fireBase
                                             .firestore()
                                             .collection('users')
                                             .where('id','not-in',[...followedUsersIds,...blockedUsersIds,currentUserId])
                                          
+                                            
 
                 recommendedResponse.onSnapshot(snapshot=>
                 {
@@ -60,7 +59,8 @@ const model ={
                                 followers : user.data().followers , 
                                 blocked   : user.data().blocked , 
                             }))
-
+                            console.log(recommended)
+                            
                      //exclude users who have blocked us
                      recommended       = [...recommended.filter(u=> !ids(u.blocked).includes(currentUserId) )]
 
@@ -68,11 +68,11 @@ const model ={
                      const usersFollowedByUsersWeFollow =  [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
                      const usersWhoFollowUsersWeFollow  =  [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
                      const usersWhoUseSameTags          =  [...recommended.filter(u=> u.tags.some(f => currentUserTags.includes(f)))]
-                     
                      console.log({usersFollowedByUsersWeFollow})
                      console.log({usersWhoFollowUsersWeFollow})
                      console.log({usersWhoUseSameTags})
-                     //either this or that randomly  
+
+                    //either this or that randomly  
                     //  if(Math.round(Math.random()) == 0)
                     //  {
                       
@@ -168,27 +168,39 @@ const model ={
         },
         async toggleFollow({user,follow},state){
             try {
+                if(user.followers) delete user.followers
+                
                 let  CurrentUserupdate = null 
                 let  visitedUserupdate = null 
                 let  following = [...state.auth.user.following]
+                const follower = {
+                    id        : state.auth.user.id ,
+                    image     : state.auth.user.image ,
+                    user_name : state.auth.user.user_name ,
+                    full_name : state.auth.user.full_name ,
+                }
 
-                //update following array if current user
+
+                //update following array of current user
                 if(follow)
                 {
                     following = [...following.filter(u=>u.id != user.id )]
                     CurrentUserupdate ={ following: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
-                    visitedUserupdate ={ followers: fireBaseNameSpace.firestore.FieldValue.arrayRemove(user) }
+                    visitedUserupdate ={ followers: fireBaseNameSpace.firestore.FieldValue.arrayRemove(follower) }
                 }else{
                     following.push(user)
                     CurrentUserupdate ={ following: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
-                    visitedUserupdate ={ followers: fireBaseNameSpace.firestore.FieldValue.arrayUnion(user) }
+                    visitedUserupdate ={ followers: fireBaseNameSpace.firestore.FieldValue.arrayUnion(follower) }
                 }
 
                 //update visted followers 
+                console.log(visitedUserupdate)
+                if(visitedUserupdate == null) throw new Error('FAILED_UPDATE')
                 const docRef          = await fireBase.firestore().collection('users').doc(user.doc_id)
                 const updateResponse  = await docRef.update(visitedUserupdate) 
+            
 
-                dispatch.auth.editFollowing({CurrentUserupdate,following})
+                dispatch.auth.editFollowing({update:CurrentUserupdate,following})
                 dispatch.toast.add(!follow?FOLLOWED:UNFOLLOWED,"SUCCESS")
             } catch (error) {
                  console.log(error)

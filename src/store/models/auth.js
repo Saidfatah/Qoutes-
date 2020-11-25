@@ -56,7 +56,7 @@ const model ={
                console.log(error)
            }
         },
-        async login({email,password}){
+        async login({email,password},state){
             try {
                const logginResponse =await fireBase.auth().signInWithEmailAndPassword(email,password)
                const id= logginResponse.user.uid
@@ -66,6 +66,8 @@ const model ={
                const userDocResponse= await fireBase.firestore().collection('users').where('id','==',id)
                userDocResponse.onSnapshot(snapshot=>
                {
+                     if(state.auth.IsAuthenticated) return ;
+
                      const userDoc= snapshot.docs[0].data()
                      if( userDoc === undefined || userDoc === null) throw new Error('NO_USER')
 
@@ -83,8 +85,8 @@ const model ={
                          doc_id:snapshot.docs[0].id,
                          birth_date:userDoc.birth_date.toDate() 
                         }))
-                     dispatch.toast.add({message:LOGGED_IN,type:"SUCCESS"})
-
+                    
+                    dispatch.toast.add({message:LOGGED_IN,type:"SUCCESS"})
                })
               
             } catch (error) {
@@ -102,7 +104,7 @@ const model ={
                   console.log(error)
               }
         },
-        async signup({email,password,full_name,birth_date,user_name,country}){
+        async signup({email,password,full_name,birth_date,user_name,country},state){
             try {
                 // check for username 
                 const userNameCheckResponse = await fireBase
@@ -129,6 +131,7 @@ const model ={
                 //check if user doc was created and get it 
                 createUserDocResponse.onSnapshot(snapshot=>
                 {
+                    if(state.auth.IsAuthenticated) return ;
                     const userDoc= snapshot.data()
                     const docs =snapshot.data()
 
@@ -165,8 +168,7 @@ const model ={
         },
         async editUser({update},state){
             try {
-                console.log(update)
-                const targetUser =await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
+                const targetUser    = await fireBase.firestore().collection('users').doc(state.auth.user.doc_id)
                 const updateResponse= await targetUser.update(update) 
 
                 dispatch.auth.editedUser(update)
