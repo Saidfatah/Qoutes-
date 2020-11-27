@@ -4,7 +4,8 @@ import userModel from '../../Common/Firebase/models/user'
 import {USER_DOESNT_EXIST} from '../../Common/messages/errors'
 import {IMAGE_UPLOAD,UPDATED,FOLLOWED,UNFOLLOWED,BLOCKED,UNBLOCKED} from '../../Common/messages/succes'
 
-const ids=users=>users.map(u=>u.id)
+const ids=users=>[...users.map(u=>u.id)]
+const intersect = (arr1,arr2)=> arr1.filter(element=> arr2.includes(element)).length>0 
 
 const model ={
     state:{
@@ -59,29 +60,26 @@ const model ={
                                 followers : user.data().followers , 
                                 blocked   : user.data().blocked , 
                             }))
-                            console.log(recommended)
                             
                      //exclude users who have blocked us
                      recommended       = [...recommended.filter(u=> !ids(u.blocked).includes(currentUserId) )]
 
-  
-                     const usersFollowedByUsersWeFollow =  [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
-                     const usersWhoFollowUsersWeFollow  =  [...recommended.filter(u=> ids(u.followers).some( f => followedUsersIds.includes(f)) )]
+                     const usersFollowedByUsersWeFollow =  [...recommended.filter( u => intersect(ids(u.followers),followedUsersIds) )]
+                     const usersWhoFollowUsersWeFollow  =  [...recommended.filter( u => intersect(ids(u.following),followedUsersIds) )]
                      const usersWhoUseSameTags          =  [...recommended.filter(u=> u.tags.some(f => currentUserTags.includes(f)))]
+
+                     const userToRecommend=[...usersFollowedByUsersWeFollow,...usersWhoFollowUsersWeFollow,...usersWhoUseSameTags]
+                     //either this or that randomly  
+                     //  if(Math.round(Math.random()) == 0)
+                     //  {
+                       
+                     //  }else{
+                          
+                     //  }
                      console.log({usersFollowedByUsersWeFollow})
                      console.log({usersWhoFollowUsersWeFollow})
-                     console.log({usersWhoUseSameTags})
-
-                    //either this or that randomly  
-                    //  if(Math.round(Math.random()) == 0)
-                    //  {
-                      
-                    //  }else{
-                         
-                    //  }
-
-
-                     dispatch.users.fetchedRecommended(recommended)
+               
+                     dispatch.users.fetchedRecommended(userToRecommend)
                 })
               
             } catch (error) {
