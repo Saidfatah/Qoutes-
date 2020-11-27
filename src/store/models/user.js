@@ -4,9 +4,9 @@ import userModel from '../../Common/Firebase/models/user'
 import {USER_DOESNT_EXIST} from '../../Common/messages/errors'
 import {IMAGE_UPLOAD,UPDATED,FOLLOWED,UNFOLLOWED,BLOCKED,UNBLOCKED} from '../../Common/messages/succes'
 
+
 const ids=users=>[...users.map(u=>u.id)]
 const intersect = (arr1,arr2)=> arr1.filter(element=> arr2.includes(element)).length>0 
-
 const model ={
     state:{
         searched_users  : [],
@@ -45,10 +45,10 @@ const model ={
                                             .where('id','not-in',[...followedUsersIds,...blockedUsersIds,currentUserId])
                                          
                                             
-
+               
                 recommendedResponse.onSnapshot(snapshot=>
                 {
-                     let recommended   = snapshot.docs.map(user=> (
+                     let usersFetched   = snapshot.docs.map(user=> (
                             {
                                 image     : user.data().image ,
                                 doc_id    : user.id ,
@@ -62,23 +62,15 @@ const model ={
                             }))
                             
                      //exclude users who have blocked us
-                     recommended       = [...recommended.filter(u=> !ids(u.blocked).includes(currentUserId) )]
+                     usersFetched       = [...usersFetched.filter(u=> !ids(u.blocked).includes(currentUserId) )]
 
-                     const usersFollowedByUsersWeFollow =  [...recommended.filter( u => intersect(ids(u.followers),followedUsersIds) )]
-                     const usersWhoFollowUsersWeFollow  =  [...recommended.filter( u => intersect(ids(u.following),followedUsersIds) )]
-                     const usersWhoUseSameTags          =  [...recommended.filter(u=> u.tags.some(f => currentUserTags.includes(f)))]
+                     const usersFollowedByUsersWeFollow =  [...usersFetched.filter( u => intersect(ids(u.followers),followedUsersIds) )]
+                     const usersWhoFollowUsersWeFollow  =  [...usersFetched.filter( u => intersect(ids(u.following),followedUsersIds) )]
+                     const usersWhoUseSameTags          =  [...usersFetched.filter(u=> u.tags.some(f => currentUserTags.includes(f)))]
+                     const userToRecommend              =  [...usersFollowedByUsersWeFollow,...usersWhoFollowUsersWeFollow,...usersWhoUseSameTags]
+                    
+                     //we need to filter out doubles 
 
-                     const userToRecommend=[...usersFollowedByUsersWeFollow,...usersWhoFollowUsersWeFollow,...usersWhoUseSameTags]
-                     //either this or that randomly  
-                     //  if(Math.round(Math.random()) == 0)
-                     //  {
-                       
-                     //  }else{
-                          
-                     //  }
-                     console.log({usersFollowedByUsersWeFollow})
-                     console.log({usersWhoFollowUsersWeFollow})
-               
                      dispatch.users.fetchedRecommended(userToRecommend)
                 })
               
