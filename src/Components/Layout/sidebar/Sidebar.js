@@ -1,6 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import {Link } from "react-router-dom";
+import colors from '../../Common/Styled Components/colors'
+import {Background,Frame} from '../../Common/Styled Components/Container'
+
 
 export const Sidebar = ({user,IsAuthenticated,logout}) => {
   
@@ -8,17 +11,20 @@ export const Sidebar = ({user,IsAuthenticated,logout}) => {
 
 
     return (
-        <div>
-             <h3>sideb bar</h3>
-             <Link to="/">Home</Link>
-             <Link to={"/profile/"+user.doc_id} >Profile</Link>
-             <p> {IsAuthenticated ? user.full_name :"no user logged" }</p>
-             {
-                 IsAuthenticated 
-                 ?<Link to="/" onClick={logout}>logout</Link>
-                 :null
-             }
-        </div>
+        <Frame  width={"100%"}  height={"100%"} >
+             <Background bgColor={colors.sideBarBackground} >
+                 
+                  <h3>sideb bar</h3>
+                  <Link to="/">Home</Link>
+                  <Link to={"/profile/"+user.doc_id} >Profile</Link>
+                  <p> {IsAuthenticated ? user.full_name :"no user logged" }</p>
+                  {
+                      IsAuthenticated 
+                      ?<Link to="/" onClick={logout}>logout</Link>
+                      :null
+                  }
+             </Background>
+        </Frame>
     )
 }
 

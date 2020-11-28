@@ -1,11 +1,15 @@
 import React  from 'react'
 import { connect } from 'react-redux'
+import {FlashMessage,Tag} from '../Styled Components/Container'
+import colors from '../Styled Components/colors'
 
 export const Toast = ({toast}) => {
     return (
-        <div>
-            {toast.map((t,i)=><li key={i}>{t.message}</li>)}
-        </div>
+        <FlashMessage display={toast.length?"flex":"none"}>
+            <Tag bgColor={colors.flashMessageBackground} color={colors.flashMessage}>
+                 {toast.map((t,i)=><li key={i}>{t.message}</li>)}
+            </Tag>
+        </FlashMessage>
     )
 }
 

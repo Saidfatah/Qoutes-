@@ -6,7 +6,7 @@ import Toast from './Common/toast/Toast'
 import UserProfilRouter from './User/UserProfilRouter'
 import QuotesHome from './Qoutes/QuotesHome'
 import Redirect from './Common/Redirect/Redirect'
-import{Flex} from '../Components/Common/Styled Components/Container'
+import{Flex,FlexItem,Frame} from '../Components/Common/Styled Components/Container'
 
 import {
   BrowserRouter as Router,
@@ -27,15 +27,21 @@ const  App=({checkAuth,IsAuthenticated})=> {
      <>
       <Router>
           <Toast />
-         <Flex>
-          { IsAuthenticated? <Sidebar />:null }
-          <Switch>
-             <Route exact path="/" children={<QuotesHome />} />
-             <Route exact path="/profile/:id" children={<UserProfilRouter />} />
-             <Route exact path="/auth" children={<Auth />} />
-          </Switch>
-
-         </Flex>
+          <Frame  width={"100%"}  height={"100vh"} >
+             <Flex>
+              <FlexItem flex={1}>
+                    { IsAuthenticated? <Sidebar />:null }
+              </FlexItem>
+              <FlexItem flex={4}>
+                <Switch>
+                   <Route exact path="/" children={<QuotesHome />} />
+                   <Route exact path="/profile/:id" children={<UserProfilRouter />} />
+                   <Route exact path="/auth" children={<Auth />} />
+                </Switch>
+          </FlexItem>
+    
+             </Flex>
+          </Frame>
         
       </Router>
      </>
