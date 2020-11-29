@@ -22,8 +22,9 @@ const model ={
            
         usersSuggested            : (state,payload)=>({...state,suggested_users:payload }),
         SuggestedUserCleared      : (state,payload)=>({...state,suggested_users:null }),
- 
+        
         usersSearched             : (state,payload)=>({...state,searched_users:[...state.searched_users,payload] }),
+        searchedUsersCleared      : (state,payload)=>({...state,searched_users:[] }),
         usersSearchFailed         : (state,payload)=>({...state,searched_users:[] }),
  
         userFetchFailed           : (state,payload)=>({...state,visited_user:null , recommendation : null}),
@@ -80,13 +81,17 @@ const model ={
                 dispatch.users.fetchRecommendedFailed()
             }
         },
-        async searchUsers(user_name,state){
-            //implemnt agolia
-           try {
+        async searchUsers(searchText,state){
+            try {
+                //implemnt agolia
+                console.log(searchText)
+                dispatch.users.searchedUsersCleared()
                 const usersSearchResponse= await fireBase
                                              .firestore()
                                              .collection('users')
-                                             .where('user_name','==',user_name)
+                                             .orderBy("full_name")
+                                             .startAt(searchText)
+                                             .endAt(searchText+ "\uf8ff")
                 usersSearchResponse.onSnapshot(snapshot=>
                 {
                     const userDoc= snapshot.docs[0].data()
@@ -97,7 +102,7 @@ const model ={
                 console.log(error)
                 if(error.message =="NO_USER") 
                    dispatch.toast.add({message:USER_DOESNT_EXIST,type:"DANGER"})
-                dispatch.auth.usersSearchFailed()
+                dispatch.users.usersSearchFailed()
             }
         },
         async suggestUsers(full_name,state){
@@ -128,9 +133,9 @@ const model ={
                 dispatch.auth.usersSearchFailed()
             }
         },
-        async clearSuggestedUser(user_name,state){
+        async clearSearchedUsers(user_name,state){
            try {
-                dispatch.users.SuggestedUserCleared()
+                dispatch.users.searchedUsersCleared()
             } catch (error) {
                 console.log(error)
             }

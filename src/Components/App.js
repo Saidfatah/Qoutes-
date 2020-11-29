@@ -26,6 +26,7 @@ const  App=({checkAuth,IsAuthenticated})=> {
   return (
      <>
       <Router>
+          <Redirect />
           <Toast />
           <Frame  width={"100%"}  height={"100vh"} >
              <Flex>
