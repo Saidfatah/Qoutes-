@@ -3,7 +3,6 @@ import {
      faHeart,
      faSignLanguage,
      faShare ,
-     faCommentAlt,
      faHashtag,
      faImage ,
      faArrowLeft,
