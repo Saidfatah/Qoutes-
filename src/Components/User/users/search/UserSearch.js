@@ -6,13 +6,14 @@ import {AutoSuggestionContainer} from '../../../Common/Styled Components/Contain
 
 
 
-export const UserSearch = ({suggested_users,suggestUsers,clearSuggestedUser}) => {
+export const UserSearch = ({searched_users,searchUsers,clearSearchedUsers}) => {
     const [suggestions, setsuggestions] = useState([])
     const [value, setvalue] = useState("")
 
      useEffect(() => {
-         if(suggested_users != null)setsuggestions(suggested_users)
-     }, [suggested_users])
+         console.log({searched_users})
+         if(searched_users != null)setsuggestions(searched_users)
+     }, [searched_users])
      
 
      const onChange = (e,{newValue }) => {setvalue(newValue) };
@@ -23,15 +24,15 @@ export const UserSearch = ({suggested_users,suggestUsers,clearSuggestedUser}) =>
       };
      
      const getSuggestionValue = suggestion => {
-         console.log({suggestion})
          return suggestion.full_name;
      }
   
      const onSuggestionsFetchRequested = () => {
-        suggestUsers(value)
+         console.log(value)
+         searchUsers(value)
      };
      const onSuggestionsClearRequested = () => {
-        clearSuggestedUser()
+        clearSearchedUsers()
      };
 
 
@@ -55,11 +56,11 @@ export const UserSearch = ({suggested_users,suggestUsers,clearSuggestedUser}) =>
 
 export default connect(
     state=>({
-        suggested_users : state.users.suggested_users
+        searched_users     : state.users.searched_users
     }), 
     dispatch=>({
-        suggestUsers:dispatch.users.suggestUsers ,
-        clearSuggestedUser:dispatch.users.clearSuggestedUser ,
+        searchUsers        :dispatch.users.searchUsers ,
+        clearSearchedUsers :dispatch.users.clearSearchedUsers ,
     })
     )
 (UserSearch)
