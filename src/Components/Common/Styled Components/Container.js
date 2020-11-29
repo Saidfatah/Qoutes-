@@ -1,7 +1,8 @@
 import styled from 'styled-components'
-
+import colors from './colors'
 export const Flex = styled.div`
 width:100%;
+height:100%;
 display:flex;
 align-items:${({align})=>align?align:'center'};
 flex-direction:${(props)=>props.dir? props.dir :"row"};
@@ -9,6 +10,8 @@ justify-content:${(props)=>props.justify? props.justify :"left"};
 `
 export const FlexItem = styled.div`
 flex:${({flex})=>flex};
+width:100%;
+height:100%;
 `
 
 
@@ -16,8 +19,21 @@ export const Frame = styled.div`
 width      : ${({width})=>width};
 height     : ${({height})=>height};
 `
+
+export const Border = styled.div`
+  ${({border})=>"border-"+border+":1px solid "+colors.borderColor }
+`
+export const Box = styled.div`
+  ${({padding})=>padding?"padding:"+padding:""}
+  ${({margin})=>margin?"margin:"+margin:""}
+`
+
+
+
 export const Background = styled.div`
 background : ${({bgColor})=>bgColor};
+width:100%;
+height:100%;
 `
 export const FlashMessage = styled.div`
 position:absolute ; 
