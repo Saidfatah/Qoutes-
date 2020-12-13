@@ -30,17 +30,18 @@ const  App=({checkAuth,IsAuthenticated})=> {
           <Toast />
           <Frame  width={"100%"}  height={"100vh"} >
              <Flex>
-              <FlexItem flex={1}>
-                    { IsAuthenticated? <Sidebar />:null }
-              </FlexItem>
-              <FlexItem flex={4}>
+                   { 
+                   IsAuthenticated
+                   ? <FlexItem flex={1}> <Sidebar /> </FlexItem>
+                   :null
+                   }
+                  <FlexItem flex={4}>
                 <Switch>
                    <Route exact path="/" children={<QuotesHome />} />
                    <Route exact path="/profile/:id" children={<UserProfilRouter />} />
                    <Route exact path="/auth" children={<Auth />} />
                 </Switch>
           </FlexItem>
-    
              </Flex>
           </Frame>
         
