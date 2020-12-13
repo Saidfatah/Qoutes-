@@ -2,3 +2,28 @@
   padding: 0;
   margin: 0;
 }
+
+@font-face {
+  font-family: "Bregular";
+  src: url("../fonts/Baskerville-Regular.ttf") format('truetype');
+}
+@font-face {
+  font-family: "Bbold";
+  src: url("../fonts/BASKVILL.TTF") format('truetype');
+}
+@font-face {
+  font-family: "Blight";
+  src: url("../fonts/Baskerville\ Light.ttf") format('truetype');
+}
+@font-face {
+  font-family: "Futura";
+  src: url("../fonts/futur.ttf") format('truetype');
+}
+@font-face {
+  font-family: "FuturaLightItalic";
+  src: url("../fonts/Futura\ Light\ Italic\ font.ttf") format('truetype');
+}
+@font-face {
+  font-family: "FuturaLight";
+  src: url("../fonts/futura\ light\ bt.ttf") format('truetype');
+}

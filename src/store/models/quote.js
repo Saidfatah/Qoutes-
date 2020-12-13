@@ -68,7 +68,12 @@ const model ={
             //qoutes now have shared_by list 
             //liked_by list 
             //so now when we get all the qoutes we can just check if our Local followed_ids are in any of these lists 
-  
+            
+
+            //first query only quotes of followed users
+            //we'll have followed quotes 
+            //and we'll have none followed quotes 
+            //now these none  followed users's qoutes are what will be filtering for (liked by, and shared by)  
             try {
                 const getQoutesResponse= await fireBase.firestore()
                                                        .collection('qoutes')
@@ -86,7 +91,7 @@ const model ={
                  dispatch.toast.add({message:QOUTES_LOAD_FAILED,type:"DANGER"})
             }
         },
-        async loadProfilQoutes(){
+        async loadProfileQoutes(){
 
         },
 
